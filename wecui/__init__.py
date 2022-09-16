@@ -8,14 +8,27 @@ from os.path import join
 from wecui.utils import *
 
 from wecui.ask_string import askString
+from wecui.ask_confirmation import askConfirmation
 from wecui.show_message import showMessage
 from wecui.run_wec import start_wec, start_chromium
+from wecui.profile_default import default_profile
 
 class App(tk.Tk):
 
     def __init__(self):
         super().__init__()
         self.title('WEC remote')
+
+        self.loadConfig()
+
+        self.CHROMIUM = findChromium(self.WEC_LOCATION)
+        if self.CHROMIUM is None:
+            showMessage(
+                self,
+                "Fehler",
+                f"Konnte keine Puppeteeer Installation unter {self.WEC_LOCATION} finden"
+            )
+            exit(1)
 
         self.project = None
 
@@ -31,19 +44,65 @@ class App(tk.Tk):
         self.combobox.bind('<<ComboboxSelected>>', self.comboboxItemSelected)
 
 
+    def selectProject(self, project):
+        for c in self.treeview.get_children():
+            if self.treeview.item(c)['text'] == project:
+                self.treeview.selection_set(c)
+                break
+
+
+    def selectProfile(self, profile):
+        self.combobox.set(profile)
+        self.comboboxItemSelected(None)
+
+
+    def loadConfig(self):
+        config = join(CONFIG_DIR, 'wecui.cfg')
+        try:
+            with open(config, 'r') as f:
+                c = json.load(f)
+                self.WEC_LOCATION = c['wec_location']
+        except:
+            showMessage(
+                self,
+                "Keine Konfiguration",
+                f"Konnte keine Konfigurationsdatei ({config}) finden."
+            )
+            exit(1)
+
+
+
+
     def newProject(self, project):
         if project is not None:
-            newProject(project)
-            self.updateProjects()
+            if newProject(project):
+                self.updateProjects()
+                self.selectProject(project)
+            else:
+                showMessage(
+                    self,
+                    "Fehler",
+                    f"Konnte Projekt {project} nich erstellen"
+                )
 
 
     def newProfile(self, profile, project):
-        if False == newProfile(profile, project):
+        if False == newProfile(
+            profile,
+            project,
+            profile_default=default_profile(profileTitle(project, profile))
+        ):
             showMessage(
                 self,
                 "Kann Profil nicht erstellen",
                 "Ein Profil mit diesem Namen existiert bereits"
             )
+        else:
+            self.updateProjects()
+            self.selectProject(project)
+            self.updateProfiles(project)
+            self.selectProfile(profile)
+            self.comboboxItemSelected(None)
 
 
     def copyProfile(self, profile, project):
@@ -53,7 +112,7 @@ class App(tk.Tk):
                 self,
                 "Profil Kopieren",
                 "Name des neuen Profils:",
-                profile
+                f"{profile}_kopie"
             )
             if newProfile is None:
                 return
@@ -63,11 +122,29 @@ class App(tk.Tk):
                     self,
                     "Profil existiert bereits",
                     "Ein Profil mit diesem Namen existiert bereits"
+                    f"{profile}_kopie"
                 )
+        self.updateProfiles(self.project)
+        self.selectProfile(newProfile)
 
 
-    def delProject(self, project=None):
-        return
+
+
+    def deleteProject(self):
+
+        item = self.treeview.selection()[0]
+        project = self.treeview.item(item)['text']
+
+        def onError(f,p,e):
+            showMessage(self, "Fehler", f"Kann Projekt {project} nicht löschen")
+
+        if askConfirmation(
+            self,
+            "Projekt Löschen?",
+            f"Soll das Projekt {project} wirklich unwiderruflich gelöscht werden?"
+        ):
+            deleteProject(project, onError)
+            self.updateProjects()
 
 
     def updateProjects(self):
@@ -175,10 +252,33 @@ class App(tk.Tk):
 
     def saveProfile(self, project, profile):
         json = self.getProfileJSON()
-        if not saveProfile(json, self.project, self.profile.get()):
-            #show error
-            return
-        return
+        if not saveProfile(
+            json,
+            project,
+            profile
+        ):
+            showMessage(
+                self,
+                "Fehler",
+                f"Konnte Profil {profile} nicht speichern."
+            )
+
+
+    def deleteProfile(self, project, profile):
+        if askConfirmation(
+            self,
+            "Profil Löschen?",
+            f"Soll das Profil {profile} mit allen Ergebnissen wirklich unwiderruflich gelöscht werden?"
+        ):
+            if not deleteProfile(project, profile):
+                showMessage(
+                    self,
+                    "Fehler",
+                    f"Profil {profile} konnte nicht gelöscht werden"
+                )
+            self.updateProjects()
+            self.selectProject(project)
+            self.updateProfiles(project)
 
     def startScan(self):
         url = self.url.get()
@@ -187,24 +287,25 @@ class App(tk.Tk):
         must_visit = self.txt_mustvisit.get("1.0", tk.END).split()
         timestamp = datetime.now().strftime('%Y-%m-%d_%H:%M')
         browser_profile = join(CONFIG_DIR, self.project, '_'.join(f"chromium-profile-{title}-{timestamp}".split()))
-        output = join(CONFIG_DIR, self.project, '_'.join(f"output-{title}-{timestamp}".split()))
-
-        print(browser_profile)
+        output = '_'.join(f"output-{title}-{timestamp}".split())
+        cwd = join(CONFIG_DIR, self.project)
 
         try:
             self.disableProfileControls()
-            t1 = start_chromium(url, browser_profile)
-            t1.join()
+            self.t1 = start_chromium(url, browser_profile, self.CHROMIUM)
+            self.t1.join()
 
-            t2 = start_wec(
+            self.t2 = start_wec(
                 url,
                 browser_profile,
                 title,
                 output,
+                cwd,
+                self.WEC_LOCATION,
                 num_pages,
                 must_visit,
             )
-            t2.join()
+            #self.t2.join()
         finally:
             self.enableProfileControls(True)
 
@@ -256,7 +357,7 @@ class App(tk.Tk):
 
         self.btn_del = ttk.Button(
             lb_frame,
-            command=self.delProject,
+            command=self.deleteProject,
             text="-"
         )
         self.btn_del.pack(expand=True, fill=tk.X, side=tk.RIGHT)
@@ -274,7 +375,7 @@ class App(tk.Tk):
             text="Profil Speichern",
             command=lambda: self.saveProfile(
                 self.project,
-                self.profile
+                self.profile.get()
             )
         )
         self.btn_save_profile.grid(column=1, padx="5", row=0, sticky=tk.EW)
@@ -282,10 +383,10 @@ class App(tk.Tk):
 
         self.btn_delete_profile = ttk.Button(
             r_frame,
-            text="Profil Löschen",
-            command=lambda: deleteProfile(
+            text = "Profil Löschen",
+            command = lambda: self.deleteProfile(
                 self.project,
-                self.profile
+                self.profile.get()
             )
         )
         self.btn_delete_profile.grid(column=2, padx="5", row=0, sticky=tk.EW)
@@ -294,7 +395,7 @@ class App(tk.Tk):
             r_frame,
             text="Profil Kopieren",
             command=lambda: self.copyProfile(
-                self.profile,
+                self.profile.get(),
                 self.project
             )
         )
@@ -315,12 +416,12 @@ class App(tk.Tk):
         self.btn_add_profile.grid(column=4, padx="5", row=0, sticky=tk.EW)
 
 
-
         self.lbl_title = ttk.Label(
             r_frame,
             text="Profilname:"
         )
         self.lbl_title.grid(column=0,columnspan=5,row=1,sticky="nw")
+
 
         self.txt_title = ttk.Entry(
             r_frame,
@@ -328,17 +429,20 @@ class App(tk.Tk):
         )
         self.txt_title.grid(column=0,columnspan=5,row=2,sticky="new")
 
+
         self.lbl_url = ttk.Label(
             r_frame,
             text="URL:"
         )
         self.lbl_url.grid(column=0,columnspan=5,row=3,sticky="nw")
 
+
         self.txt_url = ttk.Entry(
             r_frame,
             textvariable=self.url,
         )
         self.txt_url.grid(column=0,columnspan=5,row=4,sticky="new")
+
 
         self.lbl_visitpages = ttk.Label(
             r_frame,
@@ -366,17 +470,27 @@ class App(tk.Tk):
         )
         self.txt_mustvisit.grid(column=0, columnspan=5, row=8, sticky=tk.EW)
 
+
         self.btn_start = ttk.Button(
             r_frame,
             text="Start",
             command=lambda: self.startScan()
         )
-        self.btn_start.grid(column=0,columnspan=5, row=9, sticky=tk.NE)
+        self.btn_start.grid(column=0,columnspan=1, row=9, sticky=tk.EW)
 
 
-        self.testbutton = ttk.Button(
-            self,
-            text="test",
-            command=self.getProfileJSON
+        self.btn_open_dir = ttk.Button(
+            r_frame,
+            text="Projektordner öffnen",
+            command=lambda: openDirectory(self.project)
         )
-        self.testbutton.grid()
+        self.btn_open_dir.grid(column=4, columnspan=1,row=9,sticky=tk.EW)
+
+
+
+        #self.btn_abort = ttk.Button(
+        #    r_frame,
+        #    text="Abbrechen",
+        #    command=lambda: self.startScan()
+        #)
+        #self.btn_abort.grid(column=3,columnspan=1, row=9, sticky=tk.EW)

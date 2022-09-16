@@ -1,14 +1,19 @@
 import threading
 import subprocess
 
+from wecui.utils import openFile
+from os.path import join
+
 def __run_wec__(
     url,
     browser_profile,
     title,
     output,
+    cwd,
+    wec_dir,
     num_pages,
     must_visit,
-    first_party,
+    first_party
 ):
 
     first_party = list(map(lambda s: f"-f {s}", first_party))
@@ -16,7 +21,7 @@ def __run_wec__(
 
     subprocess.run([
         'node',
-        '/home/corrupt/git/website-evidence-collector/bin/website-evidence-collector.js',
+        join(wec_dir, 'bin', 'website-evidence-collector.js'),
         url,
         '--html',
         '--overwrite',
@@ -24,19 +29,24 @@ def __run_wec__(
         *first_party,
         *must_visit,
         f'--browser-profile={browser_profile}',
-        f'-t {title}',
-        f'-m {num_pages}',
-        f'-o {output}',
+        '-t',  title,
+        '-m', num_pages,
+        '-o', output,
         '--',
         '--no-sandbox'
-    ])
+        ],
+        cwd=cwd
+    )
+    openFile(join(cwd, output, "inspection.html"))
+
 
 def __run_chromium__(
     url,
     browser_profile,
+    browser_binary,
 ):
     subprocess.run([
-        "/home/corrupt/git/website-evidence-collector/node_modules/puppeteer/.local-chromium/linux-901912/chrome-linux/chrome",
+        browser_binary,
         f'--user-data-dir={browser_profile}',
         "--no-first-run",
         "--no-default-browser-check",
@@ -47,12 +57,14 @@ def __run_chromium__(
 def start_chromium(
     url,
     browser_profile,
+    browser_binary,
 ):
     t = threading.Thread(
         target=__run_chromium__,
         args=(
             url,
-            browser_profile
+            browser_profile,
+            browser_binary
         ),
         daemon=True
     )
@@ -65,6 +77,8 @@ def start_wec(
     browser_profile,
     title,
     output,
+    cwd,
+    wec_dir,
     num_pages = 50,
     must_visit = [],
     first_party = [],
@@ -76,6 +90,8 @@ def start_wec(
             browser_profile,
             title,
             output,
+            cwd,
+            wec_dir,
             num_pages,
             must_visit,
             first_party,

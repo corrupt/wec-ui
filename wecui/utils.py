@@ -1,7 +1,9 @@
-from os import listdir, makedirs, remove
+from os import listdir, makedirs, remove, walk
 from os.path import isfile, isdir, join, abspath, basename
 from xdg import xdg_config_home
-from shutil import copyfile, SameFileError
+from shutil import copyfile, SameFileError, rmtree
+import subprocess
+import sys
 import json
 import re
 
@@ -50,6 +52,16 @@ def newProject(project, dir=CONFIG_DIR):
     except FileExistsError:
         return False
 
+def deleteProject(project, onError, dir=CONFIG_DIR):
+    absdir = abspath(dir)
+    project = join(absdir, project)
+    try:
+        rmtree(project, onerror=onError)
+    finally:
+        return
+
+
+
 def newProfile(profile, project, dir=CONFIG_DIR, profile_default=""):
     absdir=abspath(dir)
     p = join(absdir, project, f"wec-{profile}-profile.json")
@@ -66,10 +78,19 @@ def copyProfile(profile, newProfile, project, dir=CONFIG_DIR):
     dst = join(absdir, project, f"wec-{newProfile}-profile.json")
     try:
         copyfile(src, dst)
+        with open(dst, 'r+') as f:
+            d = json.load(f)
+            d['title'] = profileTitle(project, newProfile)
+            f.seek(0)
+            f.truncate()
+            json.dump(d, f)
         return True
     except SameFileError:
         return False
 
+
+def profileTitle(project, profile):
+    return f"{project} - {profile}"
 
 
 def saveProfile(data, project, profile, dir=CONFIG_DIR):
@@ -105,6 +126,7 @@ def openProfile(project, profile, dir=CONFIG_DIR):
 def deleteProfile(project, profile, dir=CONFIG_DIR):
     absdir=abspath(dir)
     p = join(absdir, project, f"wec-{profile}-profile.json")
+    print(p)
     try:
         remove(p)
         return True
@@ -112,9 +134,59 @@ def deleteProfile(project, profile, dir=CONFIG_DIR):
         return False
 
 
+def openDirectory(project, dir=CONFIG_DIR):
+    absdir=abspath(dir)
+    d = join(absdir, project)
+    print(d)
+
+    if sys.platform.startswith('linux'):
+        subprocess.Popen([
+            'dbus-send',
+            '--session',
+            '--print-reply',
+            '--dest=org.freedesktop.FileManager1',
+            '--type=method_call',
+            '/org/freedesktop/FileManager1',
+            'org.freedesktop.FileManager1.ShowItems',
+            f'array:string:file://{d}/',
+            'string:""'
+        ])
+    elif sys.platform.startswith('win32'):
+        os.startfile(d)
+    elif sys.platform.startswith('darwin'):
+        subprocess.Popen(['open', d])
 
 
-#def profileExists(project, profile, dir=CONFIG_DIR):
-#    absdir = abspath(dir)
-#    p = join(absdir, project, f"wec-{profile}-profile.json")
-#    return isfile(p)
+def openFile(f):
+    if sys.platform.startswith('linux'):
+        subprocess.Popen(['xdg-open', f])
+    elif sys.platform.startswith('win32'):
+        os.startfile(f)
+    elif sys.platform.startswith('darwin'):
+        subprocess.Popen(['open', f])
+
+
+def findChromium(wec_location):
+    puppeteer_dir = join(
+        wec_location,
+        'node_modules',
+        'puppeteer',
+        '.local-chromium'
+    )
+
+    try:
+        chrome1 = next(walk(puppeteer_dir))[1][0]
+        puppeteer_dir = join(puppeteer_dir, chrome1)
+
+        chrome2 = next(walk(puppeteer_dir))[1][0]
+        puppeteer_dir = join(puppeteer_dir, chrome2)
+    except:
+        return None
+
+    chrome_binary = join(puppeteer_dir, 'chrome')
+
+    if isfile(chrome_binary):
+        return chrome_binary
+    return None
+
+
