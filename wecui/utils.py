@@ -183,7 +183,16 @@ def findChromium(wec_location):
     except:
         return None
 
-    chrome_binary = join(puppeteer_dir, 'chrome')
+    if sys.platform.startswith('darwin'):
+        chrome_binary = join(
+            puppeteer_dir,
+            'Chromium.app',
+            'Contents',
+            'MacOS',
+            'Chromium'
+        )
+    else:
+        chrome_binary = join(puppeteer_dir, 'chrome')
 
     if isfile(chrome_binary):
         return chrome_binary
