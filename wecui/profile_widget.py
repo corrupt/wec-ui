@@ -11,13 +11,28 @@ from wecui.run_wec import start_wec, start_chromium
 
 class profileWidget(ttk.Frame):
 
-    def __init__(self, filename):
-        super().__init__()
+    def __init__(self, parent, project, filename):
+        super().__init__(parent, padding=10)
+        self.project = project
         self.filename = filename
+        self.profile = filename2Profile(filename)
 
         self.bind('<<destroy>>', self.onDestroy)
 
+        self.url = tk.StringVar()
+        self.projectTitle = tk.StringVar()
+        self.visitpages = tk.StringVar()
+
         self.createUI()
+        self.disableProfileControls()
+        self.data = self.openProfile(self.filename)
+        try:
+            if self.data is not None:
+                self.url.set(self.data['url'])
+                self.projectTitle.set(self.data['title'])
+                self.visitpages.set(self.data['visitpages'])
+        finally:
+            self.enableProfileControls(True)
 
 
     def onDestroy(self, event):
@@ -29,14 +44,14 @@ class profileWidget(ttk.Frame):
         self.url.set('')
         self.projectTitle.set('')
         self.visitpages.set('')
-    
+
 
     def disableProfileControls(self):
         #self.combobox['state'] = tk.DISABLED
-        self.btn_add_profile['state'] = tk.DISABLED
+        #self.btn_add_profile['state'] = tk.DISABLED
         self.btn_copy_profile['state'] = tk.DISABLED
         self.btn_save_profile['state'] = tk.DISABLED
-        self.btn_delete_profile['state'] = tk.DISABLED
+        #self.btn_delete_profile['state'] = tk.DISABLED
         self.lbl_title['state'] = tk.DISABLED
         self.txt_title['state'] = tk.DISABLED
         self.lbl_url['state'] = tk.DISABLED
@@ -50,7 +65,7 @@ class profileWidget(ttk.Frame):
 
     def enableProfileControls(self, profile_present=False):
         if (profile_present):
-            self.combobox['state'] = 'readonly'
+            #self.combobox['state'] = 'readonly'
 
             self.btn_save_profile['state'] = tk.NORMAL
             self.btn_copy_profile['state'] = tk.NORMAL
@@ -66,7 +81,18 @@ class profileWidget(ttk.Frame):
             self.txt_mustvisit['state'] = tk.NORMAL
             self.btn_start['state'] = tk.NORMAL
 
-        self.btn_add_profile['state'] = tk.NORMAL
+        #self.btn_add_profile['state'] = tk.NORMAL
+
+
+    def openProfile(self, filename):
+        if not filename:
+            return None
+
+        try:
+            with open(filename, 'r') as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            return None
 
 
     def getProfileJSON(self):
@@ -104,10 +130,15 @@ class profileWidget(ttk.Frame):
                     "Fehler",
                     f"Profil {profile} konnte nicht gelöscht werden"
                 )
-            self.updateProjects()
-            self.selectProject(project)
-            self.updateProfiles(project)
+            self.profile_update_event()
 
+
+    def profile_update_event(self):
+        self.event_generate('<<profile_update>>')
+
+
+    def profile_copy_event(self):
+        self.event_generate('<<profile_copy>>')
 
 
     def startScan(self):
@@ -150,7 +181,7 @@ class profileWidget(ttk.Frame):
                 self.profile.get()
             )
         )
-        self.btn_save_profile.grid(column=1, padx="5", row=0, sticky=tk.EW)
+        self.btn_save_profile.grid(column=0, row=0, sticky=tk.EW)
 
 
         self.btn_delete_profile = ttk.Button(
@@ -158,38 +189,23 @@ class profileWidget(ttk.Frame):
             text = "Profil Löschen",
             command = lambda: self.deleteProfile(
                 self.project,
-                self.profile.get()
+                self.profile
             )
         )
-        self.btn_delete_profile.grid(column=2, padx="5", row=0, sticky=tk.EW)
+        self.btn_delete_profile.grid(column=1, padx="5", row=0, sticky=tk.EW)
+
 
         self.btn_copy_profile = ttk.Button(
             self,
             text="Profil Kopieren",
-            command=lambda: self.copyProfile(
-                self.profile.get(),
-                self.project
-            )
+            command= lambda: self.profile_copy_event()
         )
-        self.btn_copy_profile.grid(column=3, row=0, sticky=tk.EW)
+        self.btn_copy_profile.grid(column=2, row=0, sticky=tk.EW)
 
-        self.btn_add_profile = ttk.Button(
-            self,
-            text="Neues Profil",
-            command=lambda: self.newProfile(
-                askString(
-                    self,
-                    "Neues Profil",
-                    "Neuer Profilname:"
-                ),
-                self.project
-            )
-        )
-        self.btn_add_profile.grid(column=4, padx="5", row=0, sticky=tk.EW)
 
         self.lbl_title = ttk.Label(
             self,
-            text="Profilname:"
+            text="Profiltitel:"
         )
         self.lbl_title.grid(column=0,columnspan=5,row=1,sticky="nw")
 

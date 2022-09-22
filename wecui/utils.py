@@ -18,7 +18,7 @@ def getProjects(dir=CONFIG_DIR):
 def getProfiles(project,  dir=CONFIG_DIR, regex=PROFILE_REGEX):
     absdir = join(abspath(dir), project)
     makedirs(absdir, exist_ok=True)
-    files = [f for f in listdir(absdir) if isfile(join(absdir,f))]
+    files = [join(absdir, f) for f in listdir(absdir) if isfile(join(absdir,f))]
     return list(filter(
         lambda f: f.endswith(".json"),
         files
@@ -66,10 +66,13 @@ def newProfile(profile, project, dir=CONFIG_DIR, profile_default=""):
     absdir=abspath(dir)
     p = join(absdir, project, f"wec-{profile}-profile.json")
 
-    with open(p, 'x') as f:
-        f.write(profile_default)
-        return True
-    return False
+    try:
+        with open(p, 'x') as f:
+            f.write(profile_default)
+            return True
+        return False
+    except:
+        return False
 
 
 def copyProfile(profile, newProfile, project, dir=CONFIG_DIR):
@@ -126,7 +129,6 @@ def openProfile(project, profile, dir=CONFIG_DIR):
 def deleteProfile(project, profile, dir=CONFIG_DIR):
     absdir=abspath(dir)
     p = join(absdir, project, f"wec-{profile}-profile.json")
-    print(p)
     try:
         remove(p)
         return True
@@ -137,7 +139,6 @@ def deleteProfile(project, profile, dir=CONFIG_DIR):
 def openDirectory(project, dir=CONFIG_DIR):
     absdir=abspath(dir)
     d = join(absdir, project)
-    print(d)
 
     if sys.platform.startswith('linux'):
         subprocess.Popen([

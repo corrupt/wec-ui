@@ -20,6 +20,8 @@ class App(tk.Tk):
         super().__init__()
         self.title('WEC remote')
 
+        self.lastTab = 0
+
         self.loadConfig()
 
         self.CHROMIUM = findChromium(self.WEC_LOCATION)
@@ -33,16 +35,27 @@ class App(tk.Tk):
 
         self.project = None
 
-        self.url = tk.StringVar()
-        self.projectTitle = tk.StringVar()
-        self.visitpages = tk.StringVar()
-        self.profile = tk.StringVar()
 
         self.createUI()
-        self.disableProfileControls()
         self.updateProjects()
         self.treeview.bind('<<TreeviewSelect>>', self.treeviewItemSelected)
-        #self.combobox.bind('<<ComboboxSelected>>', self.comboboxItemSelected)
+        self.notebook.bind('<<NotebookTabChanged>>', self.tabChanged)
+
+
+    def tabChanged(self, event):
+        if self.notebook.select() == self.notebook.tabs()[-1]:
+            self.notebook.select(self.lastTab)
+            self.newProfile(
+                askString(
+                    self,
+                    "Neues Profil",
+                    "Neuer Profilname:"
+                ),
+                self.project
+            )
+            self.updateProjects()
+        else:
+            self.lastTab = self.notebook.select()
 
 
     def selectProject(self, project):
@@ -53,9 +66,10 @@ class App(tk.Tk):
 
 
     def selectProfile(self, profile):
-        #self.combobox.set(profile)
-        #self.comboboxItemSelected(None)
-        return
+        for t in self.notebook.tabs():
+            if self.notebook.tab(t, 'text') == profile:
+                self.notebook.select(t)
+                self.mainloop()
 
 
     def loadConfig(self):
@@ -71,8 +85,6 @@ class App(tk.Tk):
                 f"Konnte keine Konfigurationsdatei ({config}) finden."
             )
             exit(1)
-
-
 
 
     def newProject(self, project):
@@ -100,11 +112,8 @@ class App(tk.Tk):
                 "Ein Profil mit diesem Namen existiert bereits"
             )
         else:
-            self.updateProjects()
-            self.selectProject(project)
             self.updateProfiles(project)
             self.selectProfile(profile)
-            self.comboboxItemSelected(None)
 
 
     def copyProfile(self, profile, project):
@@ -163,37 +172,27 @@ class App(tk.Tk):
         for tab in self.notebook.tabs():
             self.notebook.forget(tab)
 
-    def updateProfiles(self, project=None):
-        if project is None:
-            project = self.project
-        #profiles = list(map(filename2Profile, getProfiles(project)))
-
+    def updateProfiles(self, project):
         self.clearTabs()
 
-        for profile in getProfiles(project):
+        for filename in getProfiles(project):
+            w = profileWidget(self.notebook, project, filename)
+            w.bind('<<profile_update>>', lambda e: self.updateProfiles(project))
+            w.bind('<<profile_copy>>', lambda e: self.copyProfile(filename2Profile(filename), project))
             self.notebook.add(
-                profileWidget(profile),
-                text=filename2Profile(profile)
+                w,
+                text=filename2Profile(filename)
             )
-
-        #if len(profiles) > 0:
-        #    self.combobox['values'] = tuple(profiles)
-        #    self.combobox.current(0)
-        #    self.comboboxItemSelected(None)
-        #    self.enableProfileControls()
-        #else:
-        #    self.profile.set('')
-        #    self.comboboxItemSelected(None)
-        #    self.disableProfileControls()
+        self.notebook.add(ttk.Frame(), text='+')
 
 
     def treeviewItemSelected(self, event):
         for item in self.treeview.selection():
             self.project = self.treeview.item(item)['text']
             self.updateProfiles(self.project)
-            profiles = getProfiles(self.project)
-            self.enableProfileControls(len(profiles) > 0)
-            self.comboboxItemSelected(None)
+            #profiles = getProfiles(self.project)
+            #self.enableProfileControls(len(profiles) > 0)
+            #self.comboboxItemSelected(None)
 
 
     def comboboxItemSelected(self, event):
@@ -214,12 +213,6 @@ class App(tk.Tk):
         r_frame = ttk.Frame(self, padding="5 10 10 10")
         l_frame.grid(column=0, row=0, sticky="NEW")
         r_frame.grid(column=1, row=0, sticky="NEW")
-
-        r_frame.columnconfigure(0, weight=6)
-        r_frame.columnconfigure(1, weight=1)
-        r_frame.columnconfigure(2, weight=1)
-        r_frame.columnconfigure(3, weight=1)
-        r_frame.columnconfigure(4, weight=1)
 
 
         self.treeview = ttk.Treeview(
@@ -248,7 +241,7 @@ class App(tk.Tk):
             ),
             text="+"
         )
-        self.btn_add.pack(expand=True, fill=tk.X, side=tk.LEFT)
+        self.btn_add.pack(expand=True, fill=tk.BOTH)
 
 
         self.btn_del = ttk.Button(
@@ -256,28 +249,11 @@ class App(tk.Tk):
             command=self.deleteProject,
             text="-"
         )
-        self.btn_del.pack(expand=True, fill=tk.X, side=tk.RIGHT)
+        self.btn_del.pack(expand=True, fill=tk.BOTH, side=tk.RIGHT)
 
-
-        #self.combobox = ttk.Combobox(
-        #    r_frame,
-        #    textvariable=self.profile
-        #)
-        #self.combobox.grid(column=0, row=0, sticky=tk.EW)
 
         self.notebook = ttk.Notebook(
             r_frame,
         )
-        self.notebook.grid(column=1, row=0, sticky=tk.NSEW)
+        self.notebook.grid(column=0, row=0, sticky=tk.NSEW)
 
-
-
-
-
-
-        #self.btn_abort = ttk.Button(
-        #    r_frame,
-        #    text="Abbrechen",
-        #    command=lambda: self.startScan()
-        #)
-        #self.btn_abort.grid(column=3,columnspan=1, row=9, sticky=tk.EW)
