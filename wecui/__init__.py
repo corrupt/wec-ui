@@ -101,6 +101,7 @@ class App(tk.Tk):
 
 
     def newProfile(self, profile, project):
+        if profile is None: return
         if False == newProfile(
             profile,
             project,
@@ -176,7 +177,7 @@ class App(tk.Tk):
         self.clearTabs()
 
         for filename in getProfiles(project):
-            w = profileWidget(self.notebook, project, filename)
+            w = profileWidget(self.notebook, project, filename, self.CHROMIUM, self.WEC_LOCATION)
             w.bind('<<profile_update>>', lambda e: self.updateProfiles(project))
             w.bind('<<profile_copy>>', lambda e: self.copyProfile(filename2Profile(filename), project))
             self.notebook.add(
@@ -239,15 +240,15 @@ class App(tk.Tk):
                     "Projektname (z.B. Website):"
                 )
             ),
-            text="+"
+            text="Neues Projekt"
         )
-        self.btn_add.pack(expand=True, fill=tk.BOTH)
+        self.btn_add.pack(expand=True, side=tk.LEFT)
 
 
         self.btn_del = ttk.Button(
             lb_frame,
             command=self.deleteProject,
-            text="-"
+            text="Projekt Löschen"
         )
         self.btn_del.pack(expand=True, fill=tk.BOTH, side=tk.RIGHT)
 

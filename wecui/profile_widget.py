@@ -11,11 +11,14 @@ from wecui.run_wec import start_wec, start_chromium
 
 class profileWidget(ttk.Frame):
 
-    def __init__(self, parent, project, filename):
+    def __init__(self, parent, project, filename, chromium, wec):
         super().__init__(parent, padding=10)
         self.project = project
         self.filename = filename
         self.profile = filename2Profile(filename)
+
+        self.CHROMIUM = chromium
+        self.WEC_LOCATION = wec
 
         self.bind('<<destroy>>', self.onDestroy)
 
@@ -23,8 +26,10 @@ class profileWidget(ttk.Frame):
         self.projectTitle = tk.StringVar()
         self.visitpages = tk.StringVar()
 
+        self.url.trace_add('write', self.startButtonState)
+        self.visitpages.trace_add('write', self.startButtonState)
+
         self.createUI()
-        self.disableProfileControls()
         self.data = self.openProfile(self.filename)
         try:
             if self.data is not None:
@@ -32,8 +37,17 @@ class profileWidget(ttk.Frame):
                 self.projectTitle.set(self.data['title'])
                 self.visitpages.set(self.data['visitpages'])
         finally:
-            self.enableProfileControls(True)
+            self.startButtonState(None, None, None)
 
+
+
+    def startButtonState(self, var, index, mode):
+        url = self.url.get()
+        vp = self.visitpages.get()
+        if url and vp:
+            self.btn_start['state'] = tk.ACTIVE
+        else:
+            self.btn_start['state'] = tk.DISABLED
 
     def onDestroy(self, event):
         print(f'destroying widget for {self.filename}')
@@ -46,42 +60,42 @@ class profileWidget(ttk.Frame):
         self.visitpages.set('')
 
 
-    def disableProfileControls(self):
-        #self.combobox['state'] = tk.DISABLED
-        #self.btn_add_profile['state'] = tk.DISABLED
-        self.btn_copy_profile['state'] = tk.DISABLED
-        self.btn_save_profile['state'] = tk.DISABLED
-        #self.btn_delete_profile['state'] = tk.DISABLED
-        self.lbl_title['state'] = tk.DISABLED
-        self.txt_title['state'] = tk.DISABLED
-        self.lbl_url['state'] = tk.DISABLED
-        self.txt_url['state'] = tk.DISABLED
-        self.lbl_visitpages['state'] = tk.DISABLED
-        self.spn_visitpages['state'] = tk.DISABLED
-        self.lbl_mustvisit['state'] = tk.DISABLED
-        self.txt_mustvisit['state'] = tk.DISABLED
-        self.btn_start['state'] = tk.DISABLED
+    #def disableProfileControls(self):
+    #    #self.combobox['state'] = tk.DISABLED
+    #    #self.btn_add_profile['state'] = tk.DISABLED
+    #    self.btn_copy_profile['state'] = tk.DISABLED
+    #    self.btn_save_profile['state'] = tk.DISABLED
+    #    #self.btn_delete_profile['state'] = tk.DISABLED
+    #    self.lbl_title['state'] = tk.DISABLED
+    #    self.txt_title['state'] = tk.DISABLED
+    #    self.lbl_url['state'] = tk.DISABLED
+    #    self.txt_url['state'] = tk.DISABLED
+    #    self.lbl_visitpages['state'] = tk.DISABLED
+    #    self.spn_visitpages['state'] = tk.DISABLED
+    #    self.lbl_mustvisit['state'] = tk.DISABLED
+    #    self.txt_mustvisit['state'] = tk.DISABLED
+    #    self.btn_start['state'] = tk.DISABLED
 
 
-    def enableProfileControls(self, profile_present=False):
-        if (profile_present):
-            #self.combobox['state'] = 'readonly'
+    #def enableProfileControls(self, profile_present=False):
+    #    if (profile_present):
+    #        #self.combobox['state'] = 'readonly'
 
-            self.btn_save_profile['state'] = tk.NORMAL
-            self.btn_copy_profile['state'] = tk.NORMAL
-            self.btn_save_profile['state'] = tk.NORMAL
-            self.btn_delete_profile['state'] = tk.NORMAL
-            self.lbl_title['state'] = tk.NORMAL
-            self.txt_title['state'] = tk.NORMAL
-            self.lbl_url['state'] = tk.NORMAL
-            self.txt_url['state'] = tk.NORMAL
-            self.lbl_visitpages['state'] = tk.NORMAL
-            self.spn_visitpages['state'] = tk.NORMAL
-            self.lbl_mustvisit['state'] = tk.NORMAL
-            self.txt_mustvisit['state'] = tk.NORMAL
-            self.btn_start['state'] = tk.NORMAL
+    #        self.btn_save_profile['state'] = tk.NORMAL
+    #        self.btn_copy_profile['state'] = tk.NORMAL
+    #        self.btn_save_profile['state'] = tk.NORMAL
+    #        self.btn_delete_profile['state'] = tk.NORMAL
+    #        self.lbl_title['state'] = tk.NORMAL
+    #        self.txt_title['state'] = tk.NORMAL
+    #        self.lbl_url['state'] = tk.NORMAL
+    #        self.txt_url['state'] = tk.NORMAL
+    #        self.lbl_visitpages['state'] = tk.NORMAL
+    #        self.spn_visitpages['state'] = tk.NORMAL
+    #        self.lbl_mustvisit['state'] = tk.NORMAL
+    #        self.txt_mustvisit['state'] = tk.NORMAL
+    #        self.btn_start['state'] = tk.NORMAL
 
-        #self.btn_add_profile['state'] = tk.NORMAL
+    #    #self.btn_add_profile['state'] = tk.NORMAL
 
 
     def openProfile(self, filename):
@@ -133,6 +147,29 @@ class profileWidget(ttk.Frame):
             self.profile_update_event()
 
 
+    def renameProfile(self, project, profile):
+        check = False
+        while not check:
+            newProfile = askString(
+                self,
+                "Profil Umbenennen",
+                "Neuer Name des Profils:",
+                profile
+            )
+            if newProfile is None:
+                return
+            check = renameProfile(profile, newProfile, self.project)
+            if not check:
+                showMessage(
+                    self,
+                    "Profil existiert bereits",
+                    "Ein Profil mit diesem Namen existiert bereits"
+                    f"{profile}_kopie"
+                )
+        self.profile_update_event()
+
+
+
     def profile_update_event(self):
         self.event_generate('<<profile_update>>')
 
@@ -152,7 +189,6 @@ class profileWidget(ttk.Frame):
         cwd = join(CONFIG_DIR, self.project)
 
         try:
-            self.disableProfileControls()
             self.t1 = start_chromium(url, browser_profile, self.CHROMIUM)
             self.t1.join()
 
@@ -168,7 +204,7 @@ class profileWidget(ttk.Frame):
             )
             #self.t2.join()
         finally:
-            self.enableProfileControls(True)
+            return
 
 
     def createUI(self):
@@ -198,16 +234,27 @@ class profileWidget(ttk.Frame):
         self.btn_copy_profile = ttk.Button(
             self,
             text="Profil Kopieren",
-            command= lambda: self.profile_copy_event()
+            command=self.profile_copy_event
         )
         self.btn_copy_profile.grid(column=2, row=0, sticky=tk.EW)
+
+
+        self.btn_rename_profile = ttk.Button(
+            self,
+            text="Profil Umbenennen",
+            command= lambda: self.renameProfile(
+                self.project,
+                self.profile
+            )
+        )
+        self.btn_rename_profile.grid(column=3, row=0, padx="5", sticky=tk.EW)
 
 
         self.lbl_title = ttk.Label(
             self,
             text="Profiltitel:"
         )
-        self.lbl_title.grid(column=0,columnspan=5,row=1,sticky="nw")
+        self.lbl_title.grid(column=0,columnspan=5, row=1,sticky="nw")
 
 
         self.txt_title = ttk.Entry(
@@ -263,7 +310,7 @@ class profileWidget(ttk.Frame):
             text="Start",
             command=lambda: self.startScan()
         )
-        self.btn_start.grid(column=0,columnspan=1, row=9, sticky=tk.EW)
+        self.btn_start.grid(column=0,columnspan=1, pady=5, row=9, sticky=tk.EW)
 
 
         self.btn_open_dir = ttk.Button(
@@ -271,4 +318,4 @@ class profileWidget(ttk.Frame):
             text="Projektordner öffnen",
             command=lambda: openDirectory(self.project)
         )
-        self.btn_open_dir.grid(column=4, columnspan=1,row=9,sticky=tk.EW)
+        self.btn_open_dir.grid(column=4, columnspan=1, pady=5, row=9,sticky=tk.EW)

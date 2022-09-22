@@ -1,4 +1,4 @@
-from os import listdir, makedirs, remove, walk
+from os import listdir, makedirs, remove, walk, rename
 from os.path import isfile, isdir, join, abspath, basename
 from xdg import xdg_config_home
 from shutil import copyfile, SameFileError, rmtree
@@ -7,7 +7,7 @@ import sys
 import json
 import re
 
-PROFILE_REGEX="wec-.*-profile\.json"
+#PROFILE_REGEX="wec-.*-profile\.json"
 CONFIG_DIR=join(xdg_config_home(), "wecui")
 
 def getProjects(dir=CONFIG_DIR):
@@ -15,7 +15,7 @@ def getProjects(dir=CONFIG_DIR):
     makedirs(absdir, exist_ok=True)
     return [join(absdir,f) for f in listdir(absdir) if isdir(join(absdir,f))]
 
-def getProfiles(project,  dir=CONFIG_DIR, regex=PROFILE_REGEX):
+def getProfiles(project,  dir=CONFIG_DIR):
     absdir = join(abspath(dir), project)
     makedirs(absdir, exist_ok=True)
     files = [join(absdir, f) for f in listdir(absdir) if isfile(join(absdir,f))]
@@ -77,8 +77,8 @@ def newProfile(profile, project, dir=CONFIG_DIR, profile_default=""):
 
 def copyProfile(profile, newProfile, project, dir=CONFIG_DIR):
     absdir=abspath(dir)
-    src = join(absdir, project, f"wec-{profile}-profile.json")
-    dst = join(absdir, project, f"wec-{newProfile}-profile.json")
+    src = join(absdir, project, profile2filename(profile))
+    dst = join(absdir, project, profile2filename(newProfile))
     try:
         copyfile(src, dst)
         with open(dst, 'r+') as f:
@@ -92,13 +92,26 @@ def copyProfile(profile, newProfile, project, dir=CONFIG_DIR):
         return False
 
 
+def renameProfile(profile, newProfile, project, dir=CONFIG_DIR):
+    absdir=abspath(dir)
+    src = join(absdir, project, profile2filename(profile))
+    dst = join(absdir, project, profile2filename(newProfile))
+
+    try:
+        rename(src, dst)
+        return True
+    except Exception as e:
+        print(e)
+        return False
+
+
 def profileTitle(project, profile):
     return f"{project} - {profile}"
 
 
 def saveProfile(data, project, profile, dir=CONFIG_DIR):
     absdir=abspath(dir)
-    p = join(absdir, project, f"wec-{profile}-profile.json")
+    p = join(absdir, project, profile2filename(profile))
 
     with open(p, 'w') as f:
         f.write(data)
@@ -112,12 +125,16 @@ def filename2Profile(filename):
     return result.group(1)
 
 
+def profile2filename(profile):
+    return f"wec-{profile}-profile.json"
+
+
 def openProfile(project, profile, dir=CONFIG_DIR):
     if not profile:
         return None
 
     absdir = abspath(dir)
-    p = join(absdir, project, f"wec-{profile}-profile.json")
+    p = join(absdir, project, profile2filename(profile))
 
     try:
         with open(p, 'r') as f:
@@ -128,7 +145,7 @@ def openProfile(project, profile, dir=CONFIG_DIR):
 
 def deleteProfile(project, profile, dir=CONFIG_DIR):
     absdir=abspath(dir)
-    p = join(absdir, project, f"wec-{profile}-profile.json")
+    p = join(absdir, project, profile2filename(profile))
     try:
         remove(p)
         return True
