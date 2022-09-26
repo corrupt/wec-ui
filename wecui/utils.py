@@ -7,7 +7,6 @@ import sys
 import json
 import re
 
-#PROFILE_REGEX="wec-.*-profile\.json"
 CONFIG_DIR=join(xdg_config_home(), "wecui")
 
 def getProjects(dir=CONFIG_DIR):
@@ -64,7 +63,7 @@ def deleteProject(project, onError, dir=CONFIG_DIR):
 
 def newProfile(profile, project, dir=CONFIG_DIR, profile_default=""):
     absdir=abspath(dir)
-    p = join(absdir, project, f"wec-{profile}-profile.json")
+    p = join(absdir, project, profile2filename(profile))
 
     try:
         with open(p, 'x') as f:

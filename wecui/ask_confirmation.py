@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
 
+#from wecui.l10n import _
+
 class _askConfirmation(tk.Toplevel):
 
     def __init__(self, parent, title=None, question=None, **kwargs):
@@ -43,14 +45,14 @@ class _askConfirmation(tk.Toplevel):
 
         btn_cancel = ttk.Button(
             frame2,
-            text="abbrechen",
+            text=_("abbrechen"),
             command = self.btnCancelClick,
         )
         btn_cancel.pack(expand=True, side=tk.LEFT)
 
         btn_ok = ttk.Button(
             frame2,
-            text="ok",
+            text=_("ok"),
             command = self.btnOkClick
         )
         btn_ok.pack(expand=True, side=tk.LEFT)

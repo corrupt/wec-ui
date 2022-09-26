@@ -1,0 +1,166 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2022-09-26 13:20+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: pygettext.py 1.5\n"
+
+
+#: wecui/__init__.py:32 wecui/__init__.py:102 wecui/__init__.py:152
+#: wecui/profile_widget.py:129 wecui/profile_widget.py:143
+msgid "Fehler"
+msgstr ""
+
+#: wecui/__init__.py:33
+msgid "Konnte keine Puppeteeer Installation unter {} finden"
+msgstr ""
+
+#: wecui/__init__.py:54
+msgid "Neues Profil"
+msgstr ""
+
+#: wecui/__init__.py:55
+msgid "Neuer Profilname:"
+msgstr ""
+
+#: wecui/__init__.py:88
+msgid "Keine Konfiguration"
+msgstr ""
+
+#: wecui/__init__.py:89
+msgid "Konnte keine Konfigurationsdatei ({}) finden."
+msgstr ""
+
+#: wecui/__init__.py:103
+msgid "Konnte Projekt {} nich erstellen"
+msgstr ""
+
+#: wecui/__init__.py:116
+msgid "Kann Profil nicht erstellen"
+msgstr ""
+
+#: wecui/__init__.py:117 wecui/__init__.py:140 wecui/profile_widget.py:165
+msgid "Ein Profil mit diesem Namen existiert bereits"
+msgstr ""
+
+#: wecui/__init__.py:129 wecui/profile_widget.py:235
+msgid "Profil Kopieren"
+msgstr ""
+
+#: wecui/__init__.py:130
+msgid "Name des neuen Profils:"
+msgstr ""
+
+#: wecui/__init__.py:139 wecui/profile_widget.py:164
+msgid "Profil existiert bereits"
+msgstr ""
+
+#: wecui/__init__.py:141 wecui/profile_widget.py:166
+msgid "{}_kopie"
+msgstr ""
+
+#: wecui/__init__.py:152
+msgid "Kann Projekt {} nicht löschen"
+msgstr ""
+
+#: wecui/__init__.py:156
+msgid "Projekt Löschen?"
+msgstr ""
+
+#: wecui/__init__.py:157
+msgid "Soll das Projekt {} wirklich unwiderruflich gelöscht werden?"
+msgstr ""
+
+#: wecui/__init__.py:198
+msgid "Neues Profil für {}"
+msgstr ""
+
+#: wecui/__init__.py:199
+msgid "Neues Profil für {}:"
+msgstr ""
+
+#: wecui/__init__.py:254 wecui/__init__.py:258
+msgid "Neues Projekt"
+msgstr ""
+
+#: wecui/__init__.py:255
+msgid "Projektname (z.B. Website):"
+msgstr ""
+
+#: wecui/__init__.py:266
+msgid "Projekt Löschen"
+msgstr ""
+
+#: wecui/ask_confirmation.py:48
+msgid "abbrechen"
+msgstr ""
+
+#: wecui/ask_confirmation.py:55
+msgid "ok"
+msgstr ""
+
+#: wecui/profile_widget.py:130
+msgid "Konnte Profil {} nicht speichern."
+msgstr ""
+
+#: wecui/profile_widget.py:137
+msgid "Profil Löschen?"
+msgstr ""
+
+#: wecui/profile_widget.py:138
+msgid "Soll das Profil {} mit allen Ergebnissen wirklich unwiderruflich gelöscht werden?"
+msgstr ""
+
+#: wecui/profile_widget.py:144
+msgid "Profil {} konnte nicht gelöscht werden"
+msgstr ""
+
+#: wecui/profile_widget.py:154 wecui/profile_widget.py:243
+msgid "Profil Umbenennen"
+msgstr ""
+
+#: wecui/profile_widget.py:155
+msgid "Neuer Name des Profils:"
+msgstr ""
+
+#: wecui/profile_widget.py:213
+msgid "Profil Speichern"
+msgstr ""
+
+#: wecui/profile_widget.py:224
+msgid "Profil Löschen"
+msgstr ""
+
+#: wecui/profile_widget.py:254
+msgid "Profiltitel:"
+msgstr ""
+
+#: wecui/profile_widget.py:268
+msgid "URL:"
+msgstr ""
+
+#: wecui/profile_widget.py:282
+msgid "Anzahl Seiten:"
+msgstr ""
+
+#: wecui/profile_widget.py:297
+msgid "URLs die besucht werden müssen (eine pro Zeile)"
+msgstr ""
+
+#: wecui/profile_widget.py:309
+msgid "Start"
+msgstr ""
+
+#: wecui/profile_widget.py:317
+msgid "Projektordner öffnen"
+msgstr ""
+

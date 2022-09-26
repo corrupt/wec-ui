@@ -7,8 +7,7 @@ from wecui.ask_confirmation import askConfirmation
 from wecui.ask_string import askString
 from wecui.show_message import showMessage
 from wecui.run_wec import start_wec, start_chromium
-
-
+#from wecui.l10n import _
 class profileWidget(ttk.Frame):
 
     def __init__(self, parent, project, filename, chromium, wec):
@@ -127,22 +126,22 @@ class profileWidget(ttk.Frame):
         ):
             showMessage(
                 self,
-                "Fehler",
-                f"Konnte Profil {profile} nicht speichern."
+                _("Fehler"),
+                _("Konnte Profil {} nicht speichern.").format(profile)
             )
 
 
     def deleteProfile(self, project, profile):
         if askConfirmation(
             self,
-            "Profil Löschen?",
-            f"Soll das Profil {profile} mit allen Ergebnissen wirklich unwiderruflich gelöscht werden?"
+            _("Profil Löschen?"),
+            _("Soll das Profil {} mit allen Ergebnissen wirklich unwiderruflich gelöscht werden?").format(profile)
         ):
             if not deleteProfile(project, profile):
                 showMessage(
                     self,
-                    "Fehler",
-                    f"Profil {profile} konnte nicht gelöscht werden"
+                    _("Fehler"),
+                    _("Profil {} konnte nicht gelöscht werden").format(profile)
                 )
             self.profile_update_event()
 
@@ -152,8 +151,8 @@ class profileWidget(ttk.Frame):
         while not check:
             newProfile = askString(
                 self,
-                "Profil Umbenennen",
-                "Neuer Name des Profils:",
+                _("Profil Umbenennen"),
+                _("Neuer Name des Profils:"),
                 profile
             )
             if newProfile is None:
@@ -162,9 +161,9 @@ class profileWidget(ttk.Frame):
             if not check:
                 showMessage(
                     self,
-                    "Profil existiert bereits",
-                    "Ein Profil mit diesem Namen existiert bereits"
-                    f"{profile}_kopie"
+                    _("Profil existiert bereits"),
+                    _("Ein Profil mit diesem Namen existiert bereits"),
+                    _("{}_kopie").format(profile)
                 )
         self.profile_update_event()
 
@@ -211,7 +210,7 @@ class profileWidget(ttk.Frame):
 
         self.btn_save_profile = ttk.Button(
             self,
-            text="Profil Speichern",
+            text=_("Profil Speichern"),
             command=lambda: self.saveProfile(
                 self.project,
                 self.profile.get()
@@ -222,7 +221,7 @@ class profileWidget(ttk.Frame):
 
         self.btn_delete_profile = ttk.Button(
             self,
-            text = "Profil Löschen",
+            text = _("Profil Löschen"),
             command = lambda: self.deleteProfile(
                 self.project,
                 self.profile
@@ -233,7 +232,7 @@ class profileWidget(ttk.Frame):
 
         self.btn_copy_profile = ttk.Button(
             self,
-            text="Profil Kopieren",
+            text=_("Profil Kopieren"),
             command=self.profile_copy_event
         )
         self.btn_copy_profile.grid(column=2, row=0, sticky=tk.EW)
@@ -241,7 +240,7 @@ class profileWidget(ttk.Frame):
 
         self.btn_rename_profile = ttk.Button(
             self,
-            text="Profil Umbenennen",
+            text=_("Profil Umbenennen"),
             command= lambda: self.renameProfile(
                 self.project,
                 self.profile
@@ -252,7 +251,7 @@ class profileWidget(ttk.Frame):
 
         self.lbl_title = ttk.Label(
             self,
-            text="Profiltitel:"
+            text=_("Profiltitel:")
         )
         self.lbl_title.grid(column=0,columnspan=5, row=1,sticky="nw")
 
@@ -266,7 +265,7 @@ class profileWidget(ttk.Frame):
 
         self.lbl_url = ttk.Label(
             self,
-            text="URL:"
+            text=_("URL:")
         )
         self.lbl_url.grid(column=0,columnspan=5,row=3,sticky="nw")
 
@@ -280,7 +279,7 @@ class profileWidget(ttk.Frame):
 
         self.lbl_visitpages = ttk.Label(
             self,
-            text="Anzahl Seiten:"
+            text=_("Anzahl Seiten:")
         )
         self.lbl_visitpages.grid(column=0,columnspan=5,row=5,sticky="nw")
 
@@ -295,7 +294,7 @@ class profileWidget(ttk.Frame):
 
         self.lbl_mustvisit = ttk.Label(
             self,
-            text="URLs die besucht werden müssen (eine pro Zeile)"
+            text=_("URLs die besucht werden müssen (eine pro Zeile)")
         )
         self.lbl_mustvisit.grid(column=0, columnspan=5, row=7, sticky=tk.NW)
         self.txt_mustvisit = tk.Text(
@@ -307,7 +306,7 @@ class profileWidget(ttk.Frame):
 
         self.btn_start = ttk.Button(
             self,
-            text="Start",
+            text=_("Start"),
             command=lambda: self.startScan()
         )
         self.btn_start.grid(column=0,columnspan=1, pady=5, row=9, sticky=tk.EW)
@@ -315,7 +314,7 @@ class profileWidget(ttk.Frame):
 
         self.btn_open_dir = ttk.Button(
             self,
-            text="Projektordner öffnen",
+            text=_("Projektordner öffnen"),
             command=lambda: openDirectory(self.project)
         )
         self.btn_open_dir.grid(column=4, columnspan=1, pady=5, row=9,sticky=tk.EW)

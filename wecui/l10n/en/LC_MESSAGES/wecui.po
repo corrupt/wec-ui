@@ -1,0 +1,172 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR ORGANIZATION
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: wecui\n"
+"POT-Creation-Date: 2022-09-26 13:20+0200\n"
+"PO-Revision-Date: 2022-09-26 13:22+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Generated-By: pygettext.py 1.5\n"
+"X-Generator: Poedit 3.1.1\n"
+
+#: wecui/__init__.py:32 wecui/__init__.py:102 wecui/__init__.py:152
+#: wecui/profile_widget.py:129 wecui/profile_widget.py:143
+msgid "Fehler"
+msgstr "Error"
+
+#: wecui/__init__.py:33
+msgid "Konnte keine Puppeteeer Installation unter {} finden"
+msgstr "Could not find a puppeteer installation in {}"
+
+#: wecui/__init__.py:54
+msgid "Neues Profil"
+msgstr "New profile"
+
+#: wecui/__init__.py:55
+msgid "Neuer Profilname:"
+msgstr "New profile name:"
+
+#: wecui/__init__.py:88
+msgid "Keine Konfiguration"
+msgstr "No configuration"
+
+#: wecui/__init__.py:89
+msgid "Konnte keine Konfigurationsdatei ({}) finden."
+msgstr "Could not find configuration ({})."
+
+#: wecui/__init__.py:103
+msgid "Konnte Projekt {} nich erstellen"
+msgstr "Cannot create profile {}"
+
+#: wecui/__init__.py:116
+msgid "Kann Profil nicht erstellen"
+msgstr "Cannot create profile"
+
+#: wecui/__init__.py:117 wecui/__init__.py:140 wecui/profile_widget.py:165
+msgid "Ein Profil mit diesem Namen existiert bereits"
+msgstr "A profile with this name already exists"
+
+#: wecui/__init__.py:129 wecui/profile_widget.py:235
+msgid "Profil Kopieren"
+msgstr "Copy profile"
+
+#: wecui/__init__.py:130
+msgid "Name des neuen Profils:"
+msgstr "New profile name:"
+
+#: wecui/__init__.py:139 wecui/profile_widget.py:164
+msgid "Profil existiert bereits"
+msgstr "Profile already exists"
+
+#: wecui/__init__.py:141 wecui/profile_widget.py:166
+msgid "{}_kopie"
+msgstr "{}_copy"
+
+#: wecui/__init__.py:152
+msgid "Kann Projekt {} nicht löschen"
+msgstr "Cannot delete project {}"
+
+#: wecui/__init__.py:156
+msgid "Projekt Löschen?"
+msgstr "Delete project?"
+
+#: wecui/__init__.py:157
+msgid "Soll das Projekt {} wirklich unwiderruflich gelöscht werden?"
+msgstr "Really delete project {} irrevocably?"
+
+#: wecui/__init__.py:198
+msgid "Neues Profil für {}"
+msgstr "New profile for {}"
+
+#: wecui/__init__.py:199
+msgid "Neues Profil für {}:"
+msgstr "New profile for {}:"
+
+#: wecui/__init__.py:254 wecui/__init__.py:258
+msgid "Neues Projekt"
+msgstr "New project"
+
+#: wecui/__init__.py:255
+msgid "Projektname (z.B. Website):"
+msgstr "Project name (e.g. website):"
+
+#: wecui/__init__.py:266
+msgid "Projekt Löschen"
+msgstr "Delete project"
+
+#: wecui/ask_confirmation.py:48
+msgid "abbrechen"
+msgstr "cancel"
+
+#: wecui/ask_confirmation.py:55
+msgid "ok"
+msgstr "ok"
+
+#: wecui/profile_widget.py:130
+msgid "Konnte Profil {} nicht speichern."
+msgstr "Cannot create profile {}"
+
+#: wecui/profile_widget.py:137
+msgid "Profil Löschen?"
+msgstr "Delete profile?"
+
+#: wecui/profile_widget.py:138
+msgid ""
+"Soll das Profil {} mit allen Ergebnissen wirklich unwiderruflich gelöscht "
+"werden?"
+msgstr "Should profile {} with all results really be deleted irrevocably?"
+
+#: wecui/profile_widget.py:144
+msgid "Profil {} konnte nicht gelöscht werden"
+msgstr "Profile {} could not be deleted"
+
+#: wecui/profile_widget.py:154 wecui/profile_widget.py:243
+msgid "Profil Umbenennen"
+msgstr "Rename profile"
+
+#: wecui/profile_widget.py:155
+msgid "Neuer Name des Profils:"
+msgstr "New name for profile:"
+
+#: wecui/profile_widget.py:213
+msgid "Profil Speichern"
+msgstr "Save profile"
+
+#: wecui/profile_widget.py:224
+msgid "Profil Löschen"
+msgstr "Delete profile"
+
+#: wecui/profile_widget.py:254
+msgid "Profiltitel:"
+msgstr "Profile title:"
+
+#: wecui/profile_widget.py:268
+msgid "URL:"
+msgstr "URL:"
+
+#: wecui/profile_widget.py:282
+msgid "Anzahl Seiten:"
+msgstr "Number of pages:"
+
+#: wecui/profile_widget.py:297
+msgid "URLs die besucht werden müssen (eine pro Zeile)"
+msgstr "URLs that have to be visited (one per line)"
+
+#: wecui/profile_widget.py:309
+msgid "Start"
+msgstr "Start"
+
+#: wecui/profile_widget.py:317
+msgid "Projektordner öffnen"
+msgstr "Open project folder"
+
+#~ msgid "Neues Profil für {project}:"
+#~ msgstr "New profile for {project}"

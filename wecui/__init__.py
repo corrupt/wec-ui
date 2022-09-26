@@ -1,6 +1,7 @@
-
 import tkinter as tk
 import json
+import gettext
+
 from tkinter import ttk
 from datetime import datetime
 from os.path import join
@@ -13,7 +14,7 @@ from wecui.ask_confirmation import askConfirmation
 from wecui.show_message import showMessage
 from wecui.run_wec import start_wec, start_chromium
 from wecui.profile_default import default_profile
-
+#from wecui.l10n import _
 class App(tk.Tk):
 
     def __init__(self):
@@ -28,8 +29,8 @@ class App(tk.Tk):
         if self.CHROMIUM is None:
             showMessage(
                 self,
-                "Fehler",
-                f"Konnte keine Puppeteeer Installation unter {self.WEC_LOCATION} finden"
+                _("Fehler"),
+                _("Konnte keine Puppeteeer Installation unter {} finden").format(self.WEC_LOCATION)
             )
             exit(1)
 
@@ -43,19 +44,21 @@ class App(tk.Tk):
 
 
     def tabChanged(self, event):
-        if self.notebook.select() == self.notebook.tabs()[-1]:
-            self.notebook.select(self.lastTab)
-            self.newProfile(
-                askString(
-                    self,
-                    "Neues Profil",
-                    "Neuer Profilname:"
-                ),
-                self.project
-            )
-            self.updateProjects()
-        else:
-            self.lastTab = self.notebook.select()
+        if len(self.notebook.tabs()) > 0:
+            if self.notebook.select() == self.notebook.tabs()[-1]:
+                if self.lastTab is not None:
+                    self.notebook.select(self.lastTab)
+                self.newProfile(
+                    askString(
+                        self,
+                        _("Neues Profil"),
+                        _("Neuer Profilname:")
+                    ),
+                    self.project
+                )
+                self.updateProjects()
+            else:
+                self.lastTab = self.notebook.select()
 
 
     def selectProject(self, project):
@@ -66,10 +69,11 @@ class App(tk.Tk):
 
 
     def selectProfile(self, profile):
-        for t in self.notebook.tabs():
-            if self.notebook.tab(t, 'text') == profile:
-                self.notebook.select(t)
-                self.mainloop()
+        if len(self.notebook.tabs()) > 0:
+            for t in self.notebook.tabs():
+                if self.notebook.tab(t, 'text') == profile:
+                    self.notebook.select(t)
+                    self.mainloop()
 
 
     def loadConfig(self):
@@ -81,8 +85,8 @@ class App(tk.Tk):
         except:
             showMessage(
                 self,
-                "Keine Konfiguration",
-                f"Konnte keine Konfigurationsdatei ({config}) finden."
+                _("Keine Konfiguration"),
+                _("Konnte keine Konfigurationsdatei ({}) finden.").format(config)
             )
             exit(1)
 
@@ -95,8 +99,8 @@ class App(tk.Tk):
             else:
                 showMessage(
                     self,
-                    "Fehler",
-                    f"Konnte Projekt {project} nich erstellen"
+                    _("Fehler"),
+                    _("Konnte Projekt {} nich erstellen").format(project)
                 )
 
 
@@ -109,8 +113,8 @@ class App(tk.Tk):
         ):
             showMessage(
                 self,
-                "Kann Profil nicht erstellen",
-                "Ein Profil mit diesem Namen existiert bereits"
+                _("Kann Profil nicht erstellen"),
+                _("Ein Profil mit diesem Namen existiert bereits")
             )
         else:
             self.updateProfiles(project)
@@ -122,8 +126,8 @@ class App(tk.Tk):
         while not check:
             newProfile = askString(
                 self,
-                "Profil Kopieren",
-                "Name des neuen Profils:",
+                _("Profil Kopieren"),
+                _("Name des neuen Profils:"),
                 f"{profile}_kopie"
             )
             if newProfile is None:
@@ -132,9 +136,9 @@ class App(tk.Tk):
             if not check:
                 showMessage(
                     self,
-                    "Profil existiert bereits",
-                    "Ein Profil mit diesem Namen existiert bereits"
-                    f"{profile}_kopie"
+                    _("Profil existiert bereits"),
+                    _("Ein Profil mit diesem Namen existiert bereits"),
+                    _("{}_kopie").format(profile)
                 )
         self.updateProfiles(self.project)
         self.selectProfile(newProfile)
@@ -145,12 +149,12 @@ class App(tk.Tk):
         project = self.treeview.item(item)['text']
 
         def onError(f,p,e):
-            showMessage(self, "Fehler", f"Kann Projekt {project} nicht löschen")
+            showMessage(self, _("Fehler"), _("Kann Projekt {} nicht löschen").format(project))
 
         if askConfirmation(
             self,
-            "Projekt Löschen?",
-            f"Soll das Projekt {project} wirklich unwiderruflich gelöscht werden?"
+            _("Projekt Löschen?"),
+            _("Soll das Projekt {} wirklich unwiderruflich gelöscht werden?").format(project)
         ):
             deleteProject(project, onError)
             self.updateProjects()
@@ -176,7 +180,8 @@ class App(tk.Tk):
     def updateProfiles(self, project):
         self.clearTabs()
 
-        for filename in getProfiles(project):
+        profiles = getProfiles(project)
+        for filename in profiles:
             w = profileWidget(self.notebook, project, filename, self.CHROMIUM, self.WEC_LOCATION)
             w.bind('<<profile_update>>', lambda e: self.updateProfiles(project))
             w.bind('<<profile_copy>>', lambda e: self.copyProfile(filename2Profile(filename), project))
@@ -184,17 +189,27 @@ class App(tk.Tk):
                 w,
                 text=filename2Profile(filename)
             )
-        self.notebook.add(ttk.Frame(), text='+')
+        if len(profiles) > 0:
+            self.notebook.add(ttk.Frame(), text='+')
+        else:
+            self.newProfile(
+                askString(
+                    self,
+                    _("Neues Profil für {}").format(project),
+                    _("Neues Profil für {}:").format(project)
+                ),
+                project
+            )
 
 
     def treeviewItemSelected(self, event):
         for item in self.treeview.selection():
             self.project = self.treeview.item(item)['text']
             self.updateProfiles(self.project)
+
             #profiles = getProfiles(self.project)
             #self.enableProfileControls(len(profiles) > 0)
             #self.comboboxItemSelected(None)
-
 
     def comboboxItemSelected(self, event):
         self.clearWidgets()
@@ -236,11 +251,11 @@ class App(tk.Tk):
             command=lambda: self.newProject(
                 askString(
                     self,
-                    "Neues Projekt",
-                    "Projektname (z.B. Website):"
+                    _("Neues Projekt"),
+                    _("Projektname (z.B. Website):")
                 )
             ),
-            text="Neues Projekt"
+            text=_("Neues Projekt")
         )
         self.btn_add.pack(expand=True, side=tk.LEFT)
 
@@ -248,7 +263,7 @@ class App(tk.Tk):
         self.btn_del = ttk.Button(
             lb_frame,
             command=self.deleteProject,
-            text="Projekt Löschen"
+            text=_("Projekt Löschen")
         )
         self.btn_del.pack(expand=True, fill=tk.BOTH, side=tk.RIGHT)
 

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 
+#from wecui.l10n import _
 class _askString(tk.Toplevel):
 
     def __init__(self, parent, title=None, question=None, defaultText='', **kwargs):
