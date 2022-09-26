@@ -16,6 +16,7 @@ class _askString(tk.Toplevel):
         self.createUI()
         self.transient(parent)
 
+        self.wait_visibility()
         self.grab_set()
         self.wait_window(self)
 
