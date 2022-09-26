@@ -5,3 +5,5 @@ wec-ui is a simple user interface for instrumenting [Website Evidence Collector]
 * Starting WEC with the newly created browser profile
 
 <img width="1115" alt="image" src="https://user-images.githubusercontent.com/365169/192270522-e4c714b6-fd64-4344-9d1f-1905fec5e077.png">
+
+wec-ui requires a configuration file in `$XDG_CONFIG_HOME/wecui/config.cfg`, usually `${HOME}/.config/wecui/config.cfg`. An example config file is provided. This is necessary to point wec-ui to a installation directory of WEC.
