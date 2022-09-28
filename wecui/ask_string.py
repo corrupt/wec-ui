@@ -17,9 +17,12 @@ class _askString(tk.Toplevel):
         self.createUI()
         self.transient(parent)
 
-        self.wait_visibility()
-        self.grab_set()
-        self.wait_window(self)
+        try:
+            self.wait_visibility()
+            self.grab_set()
+            self.wait_window(self)
+        except:
+            return
 
 
     def btnCancelClick(self):
@@ -67,4 +70,7 @@ class _askString(tk.Toplevel):
 
 def askString(parent, title, question, defaultText='', **kwargs):
     ask = _askString(parent, title, question, defaultText, **kwargs)
-    return ask.ret
+    try:
+        parent.wait_window(ask)
+    finally:
+        return ask.ret

@@ -2,3 +2,8 @@
 test/
 *-venv/
 .DS_Store
+build
+dist
+*.spec
+*.spec
+*.swp

@@ -213,7 +213,7 @@ class profileWidget(ttk.Frame):
             text=_("Profil Speichern"),
             command=lambda: self.saveProfile(
                 self.project,
-                self.profile.get()
+                self.profile
             )
         )
         self.btn_save_profile.grid(column=0, row=0, sticky=tk.EW)

@@ -1,5 +1,6 @@
 from os import listdir, makedirs, remove, walk, rename
 from os.path import isfile, isdir, join, abspath, basename
+import os
 from xdg import xdg_config_home
 from shutil import copyfile, SameFileError, rmtree
 import subprocess
@@ -75,6 +76,8 @@ def newProfile(profile, project, dir=CONFIG_DIR, profile_default=""):
 
 
 def copyProfile(profile, newProfile, project, dir=CONFIG_DIR):
+    if project is None:
+        return
     absdir=abspath(dir)
     src = join(absdir, project, profile2filename(profile))
     dst = join(absdir, project, profile2filename(newProfile))

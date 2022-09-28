@@ -34,7 +34,7 @@ class App(tk.Tk):
             )
             exit(1)
 
-        self.project = None
+        #self.project = None
 
 
         self.createUI()
@@ -42,6 +42,10 @@ class App(tk.Tk):
         self.treeview.bind('<<TreeviewSelect>>', self.treeviewItemSelected)
         self.notebook.bind('<<NotebookTabChanged>>', self.tabChanged)
 
+    def getProject(self):
+        for c in self.treeview.selection():
+            return self.treeview.item(c)['text']
+        return None
 
     def tabChanged(self, event):
         if len(self.notebook.tabs()) > 0:
@@ -54,7 +58,7 @@ class App(tk.Tk):
                         _("Neues Profil"),
                         _("Neuer Profilname:")
                     ),
-                    self.project
+                    self.getProject
                 )
                 self.updateProjects()
             else:
@@ -69,11 +73,12 @@ class App(tk.Tk):
 
 
     def selectProfile(self, profile):
+        if profile is None:
+            return
         if len(self.notebook.tabs()) > 0:
             for t in self.notebook.tabs():
                 if self.notebook.tab(t, 'text') == profile:
                     self.notebook.select(t)
-                    self.mainloop()
 
 
     def loadConfig(self):
@@ -95,7 +100,7 @@ class App(tk.Tk):
         if project is not None:
             if newProject(project):
                 self.updateProjects()
-                self.selectProject(project)
+                #self.selectProject(project)
             else:
                 showMessage(
                     self,
@@ -105,7 +110,8 @@ class App(tk.Tk):
 
 
     def newProfile(self, profile, project):
-        if profile is None: return
+        if profile is None:
+            return
         if False == newProfile(
             profile,
             project,
@@ -132,7 +138,7 @@ class App(tk.Tk):
             )
             if newProfile is None:
                 return
-            check = copyProfile(profile, newProfile, self.project)
+            check = copyProfile(profile, newProfile, self.getProject())
             if not check:
                 showMessage(
                     self,
@@ -140,7 +146,7 @@ class App(tk.Tk):
                     _("Ein Profil mit diesem Namen existiert bereits"),
                     _("{}_kopie").format(profile)
                 )
-        self.updateProfiles(self.project)
+        self.updateProfiles(project)
         self.selectProfile(newProfile)
 
     def deleteProject(self):
@@ -158,6 +164,7 @@ class App(tk.Tk):
         ):
             deleteProject(project, onError)
             self.updateProjects()
+            self.updateProfiles(self.getProject())
 
 
     def updateProjects(self):
@@ -179,6 +186,8 @@ class App(tk.Tk):
 
     def updateProfiles(self, project):
         self.clearTabs()
+        if project is None:
+            return
 
         profiles = getProfiles(project)
         for filename in profiles:
@@ -204,21 +213,7 @@ class App(tk.Tk):
 
     def treeviewItemSelected(self, event):
         for item in self.treeview.selection():
-            self.project = self.treeview.item(item)['text']
-            self.updateProfiles(self.project)
-
-            #profiles = getProfiles(self.project)
-            #self.enableProfileControls(len(profiles) > 0)
-            #self.comboboxItemSelected(None)
-
-    def comboboxItemSelected(self, event):
-        self.clearWidgets()
-        profile = openProfile(self.project, self.profile.get())
-        if profile is not None:
-            self.url.set(profile['url'])
-            self.projectTitle.set(profile['title'])
-            self.visitpages.set(profile['visitpages'])
-            self.txt_mustvisit.insert('1.0', "\n".join(profile['mustvisit']))
+            self.updateProfiles(self.getProject())
 
 
     def createUI(self):
